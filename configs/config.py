@@ -74,7 +74,8 @@ _C.DATA_LOADER.RESIZE = 256
 _C.DATA_LOADER.CROP_SIZE = 224
 
 # Load data to pinned host memory
-_C.DATA_LOADER.PIN_MEMORY = True
+# _C.DATA_LOADER.PIN_MEMORY = True
+_C.DATA_LOADER.PIN_MEMORY = False
 
 # Shuffle the data
 _C.DATA_LOADER.SHUFFLE = True

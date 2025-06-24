@@ -1,6 +1,6 @@
 
 import os
-
+import sys
 import cv2
 import h5py
 import numpy as np
@@ -54,7 +54,6 @@ def get_category_metadata(cfg, metadata=None):
     if cfg.ANNOTATION.DATASET_NAME == 'CrossTask':
         keysteps_dict = {
             105253: 11,
-            105222: 6,
             109972: 5,
             113766: 11,
             16815: 3,
@@ -92,23 +91,19 @@ def get_category_metadata(cfg, metadata=None):
 def _extract_frames_h5py(video_path, frames_path):
     videocap = cv2.VideoCapture(video_path)
     video_name = video_path.split('/')[-1].split('.')[0]
+    os.makedirs(frames_path, exist_ok=True)
     h5_file_path = os.path.join(frames_path, f'{video_name}.h5')
     if os.path.isfile(h5_file_path):
         return h5_file_path
-    h5_file = h5py.File(h5_file_path, "w")
+    else:
+        print("Saving",h5_file_path,"...")
     frames = list()
     desired_shorter_side = 384
-    temp = 0
     while videocap.isOpened():
         success, frame = videocap.read()
         if not success:
-            # print('failed')
-            # print(frame)
             break
-            frames.append(temp)
-            # break
         else:
-            # print('success')
             original_height, original_width, _ = frame.shape
             if original_height < original_width:
                 # Height is the shorter side
@@ -136,11 +131,11 @@ def _extract_frames_h5py(video_path, frames_path):
                 (256, 256),
                 interpolation=cv2.INTER_AREA
             )
-            temp = frame
             frames.append(frame)
     videocap.release()
+    assert len(frames) != 0, f"Error: No frames were extracted from {video_path}. Please check the video file for issues such as GoPro TCD/GoPro SOS metadata streams."
     frames_npy = np.array(frames)
-    # print(np.shape(frames_npy))
+    h5_file = h5py.File(h5_file_path, "w")
     dataset = h5_file.create_dataset(
         "images",
         np.shape(frames_npy),
@@ -220,10 +215,6 @@ def gen_labels(fps, annotation_data, num_frames, dataset_name=None):
             start_time = step[1]
             end_time = step[2]
             label = step[0]
-        elif dataset_name == 'ProceL':
-            start_time = step[0]
-            end_time = step[1]
-            label = step[2]
         else:
             start_time = step[0]
             end_time = step[1]
@@ -387,7 +378,6 @@ def _sample_frames_gen_labels_h5py(
     assert os.path.isfile(h5_file_path), "H5 file not saved."
     h5_file = h5py.File(h5_file_path, 'r')
     frames = h5_file['images']
-    # print('here')
     videocap = cv2.VideoCapture(video_path)
     fps = int(videocap.get(cv2.CAP_PROP_FPS))
     videocap.release()

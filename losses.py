@@ -4,7 +4,7 @@ from torch.nn import functional as F
 from scipy.spatial.distance import cdist
 import pdb
 import math
-from utils import get_lav_weights, generate_unique_video_steps
+from video_align_utils import get_lav_weights, generate_unique_video_steps
 
 
 def calculate_similarity(embeddings1, embeddings2, temperature):

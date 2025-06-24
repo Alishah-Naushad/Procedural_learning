@@ -14,7 +14,7 @@ from datasets.construct_loader import get_loader
 from utils.parser import parse_args, load_config
 from utils.subset_selection import SelfSupervisionSummarization
 from utils.utils import get_category_metadata
-from utils import (
+from video_align_utils import (
     get_model,
     get_embds,
     gen_print_results,
@@ -119,7 +119,7 @@ def procedure_learning(cfg):
         print("Embeddings do not exist, creating new...")
         if not os.path.isdir(cfg.TCC.EMBDS_DIR):
             os.makedirs(cfg.TCC.EMBDS_DIR)
-        to_save_embds = dict()
+        # to_save_embds = dict()
 
     data_loader = get_loader(cfg, mode='all', transforms=get_transforms(cfg))
     
@@ -137,7 +137,7 @@ def procedure_learning(cfg):
                     cfg.TCC.CONTEXT_STRIDE,
                     video_name
                 )
-            to_save_embds[video_name] = embds
+            # to_save_embds[video_name] = embds
         else:
             embds = saved_embeddings[video_name]
         if cfg.TCC.NORMALIZE_EMBDS:
@@ -156,28 +156,29 @@ def procedure_learning(cfg):
                 'frames': frames
             }
         else:
+            pass
             # Evaluating at video level
-            if cfg.TCC.GRAPH_CUT:
-                kmeans_ind_preds = graphcut_segmentation(cfg, embds)
-            elif cfg.TCC.RANDOM_RESULTS:
-                kmeans_ind_preds = random_segmentation(cfg, embds)
-            else:
-                kmeans_ind_preds = run_kmeans(cfg, embds)
-            # print(label.squeeze())
-            # print(kmeans_ind_preds)
-            # pdb.set_trace()
-            recall, precision, iou, perm_gt, perm_pred = gen_print_results(
-                cfg,
-                label.squeeze(),
-                kmeans_ind_preds,
-                num_keysteps,
-                video_name,
-                per_keystep=True,  
-                return_assignments=True
-            )
-            average_iou.append(iou)
-            average_recall.append(recall)
-            average_precision.append(precision)
+            # if cfg.TCC.GRAPH_CUT:
+            #     kmeans_ind_preds = graphcut_segmentation(cfg, embds)
+            # elif cfg.TCC.RANDOM_RESULTS:
+            #     kmeans_ind_preds = random_segmentation(cfg, embds)
+            # else:
+            #     kmeans_ind_preds = run_kmeans(cfg, embds)
+            # # print(label.squeeze())
+            # # print(kmeans_ind_preds)
+            # # pdb.set_trace()
+            # recall, precision, iou, perm_gt, perm_pred = gen_print_results(
+            #     cfg,
+            #     label.squeeze(),
+            #     kmeans_ind_preds,
+            #     num_keysteps,
+            #     video_name,
+            #     per_keystep=True,  
+            #     return_assignments=True
+            # )
+            # average_iou.append(iou)
+            # average_recall.append(recall)
+            # average_precision.append(precision)
 
         embeddings.append(embds)
         gt.extend(label.squeeze().cpu().numpy())
@@ -187,9 +188,9 @@ def procedure_learning(cfg):
     assert len(gt) == embeddings_.shape[0]
 
     # Saving the embeddings
-    if not embeddings_present:
-        print(f'Saving embeddings to {embds_path}...')
-        pickle.dump(to_save_embds, open(embds_path, 'wb'))
+    # if not embeddings_present:
+    #     print(f'Saving embeddings to {embds_path}...')
+    #     pickle.dump(to_save_embds, open(embds_path, 'wb'))
 
     if cfg.TCC.SUBSET_SELECTION:
         # Subset selection overall preds
@@ -230,12 +231,12 @@ def procedure_learning(cfg):
         per_keystep=cfg.MISC.EVAL_PER_KEYSTEP,
     )
 
-    Fscore = (np.mean(average_precision)*np.mean(average_recall)*2)/(np.mean(average_precision)+np.mean(average_recall))
+    # Fscore = (np.mean(average_precision)*np.mean(average_recall)*2)/(np.mean(average_precision)+np.mean(average_recall))
 
-    logger.critical(f'Average precision: {np.mean(average_precision)} '
-            f'Average recall: {np.mean(average_recall)} '
-            f'Average IoU: {np.mean(average_iou)} '
-            f'Average F1: {Fscore}')
+    # logger.critical(f'Average precision: {np.mean(average_precision)} '
+    #         f'Average recall: {np.mean(average_recall)} '
+    #         f'Average IoU: {np.mean(average_iou)} '
+    #         f'Average F1: {Fscore}')
 
 
 if __name__ == '__main__':

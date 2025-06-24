@@ -182,8 +182,9 @@ def gen_print_results(
         return recall, precision, IoU
     else:
         logger.critical(
-            f"Overall Results. Precision: {precision}, Recall: {recall}, IOU: "
-            f"{IoU}, Step wise Results: {step_wise_metrics}")
+            f"Overall Results. F1: {(2 * precision * recall) / (precision + recall)}, IOU: {IoU}, "
+            f"Precision: {precision}, Recall: {recall}, Step wise Results: {step_wise_metrics}")
+        logger.critical(f"Overall Rounded Results. F1: {round((2 * precision * recall) / (precision + recall) * 100, 2)}, IOU: {round(IoU * 100, 2)}")
         if len(cfg.LOG.SAVE_CUMULATIVE_RESULTS) > 0 and cfg.LOG.DIR is not None:
             # Saving the overall results to make the experimentation process
             # faster

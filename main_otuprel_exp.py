@@ -14,9 +14,9 @@ from torch.utils.tensorboard import SummaryWriter
 
 import utils.logger as logging
 from utils.parser import parse_args, load_config
-from datasets import VideoAlignmentLoader
+from video_align_datasets import VideoAlignmentLoader
 from losses import all_loss_otuprel_exp
-from utils import get_model, get_optimizer, save_checkpoint
+from video_align_utils import get_model, get_optimizer, save_checkpoint
 
 
 logger = logging.get_logger(__name__)
